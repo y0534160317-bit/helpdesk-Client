@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUsersByIdCall, getUsersCall } from "../../api/helpdeskApi";
 import { useAuth } from "../../features/auth/loginLogic";
-import { Link, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 // MUI Imports
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';

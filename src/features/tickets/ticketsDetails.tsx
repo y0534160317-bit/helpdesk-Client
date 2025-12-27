@@ -14,8 +14,7 @@ import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import { useEffect, useState } from "react";
 import type { Ticket } from "./ticketsList";
-import axios from "axios";
-import { array } from "yup";
+
 
 
 const TicketDetails = () => {
@@ -23,64 +22,32 @@ const TicketDetails = () => {
     const location = useLocation();
     const { ticket } = location.state || {};
 
-    ///////////
-    // const [ticket, setTicket] = useState<ticketToUpdate>();
-
-    // const [currentTicket, setCurrentTicket] = useState(ticket);
-    // const handleUpdate = (updatedTicket:ticketToUpdate) => {
-    //     setCurrentTicket(updatedTicket);
-    //     {ticket}=currentTicket;
-    // };
 
     const [currentTicket, setCurrentTicket] = useState<Ticket>(ticket);
 
     useEffect(() => {
         if (currentTicket) {
-            console.log("*************--------------------------***********************************************");
+    
             setCurrentTicket(currentTicket);
 
         }
     }, [currentTicket]);
 
-    // const handleUpdate = (updatedTicket: ticketToUpdate) => {
 
-
-    //     setCurrentTicket(updatedTicket);
-    // };
     const handleUpdate = (updatedTicket: ticketToUpdate) => {
-    // const token=state.token
-    //     const response = await axios.post('http://localhost:4000/priorities',{
-    //               headers: {
-    //     Authorization:`Bearer ${token}`
-    //   }
-    // })
-    //    response.filter(response)
-   const tic = updatedTicket as Ticket;
-console.log("##############3", tic);
 
-    //    const updatedT:Ticket{
-    //         id=ticket.id,
-    //         subject=ticket.subject,
-    //         description=updatedTicket. ,
-    //         priority_name: string,
-    //     }
+   const tic = updatedTicket as Ticket;
+
+
+
 
         setCurrentTicket(tic);
     };
 
 
-// setTicket();
-// useEffect(() => {
-//     const setTicket = async () => {
-//         if (state.token === null) return;
-//         setTicket(await (state.token));
-//     }
-//     setTicket();
-// }, [state.token]);
-///////////
+
 
 if (!currentTicket) {
-    //Cannot find name 'currentTicket'.
     return (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
             <Typography variant="h6" color="textSecondary">

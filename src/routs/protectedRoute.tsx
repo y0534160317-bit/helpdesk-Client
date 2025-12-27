@@ -12,7 +12,6 @@ import UserDetails from "../features/users/userDetails";
 import AgentDashboard from "../pages/agentDashboard";
 import CustomerDashboard from "../pages/customerDashboard";
 import AddUser from "../features/users/addUser"
-import logoutState from "../pages/logoutState";
 import LogoutState from "../pages/logoutState";
 
 const RoleToDash = () => {

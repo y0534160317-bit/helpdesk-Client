@@ -16,8 +16,7 @@ const AddComment = ({ id }: { id: number | null }) => {
     if (id === null) return;
     try {
       await addCommentByIdCall(state.token, id, comment);
-      setComment(""); // ניקוי השדה לאחר שליחה
-      // הערה: רצוי להוסיף כאן מנגנון רענון לרשימת התגובות
+      setComment(""); 
     } catch (error) {
       console.error("Error adding comment:", error);
     }
