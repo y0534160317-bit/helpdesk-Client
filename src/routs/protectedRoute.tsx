@@ -12,6 +12,8 @@ import UserDetails from "../features/users/userDetails";
 import AgentDashboard from "../pages/agentDashboard";
 import CustomerDashboard from "../pages/customerDashboard";
 import AddUser from "../features/users/addUser"
+import logoutState from "../pages/logoutState";
+import LogoutState from "../pages/logoutState";
 
 const RoleToDash = () => {
     const { state } = useAuth()
@@ -19,7 +21,7 @@ const RoleToDash = () => {
         case 'admin': return <AdminDashboard />
         case 'agent': return <AgentDashboard />
         case 'customer': return <CustomerDashboard />
-        default: <App />
+        default: return <App/>
     }
 }
 
@@ -27,8 +29,10 @@ const Logout=()=>{
     localStorage.removeItem('authToken');
     const { state } = useAuth()
     state.isLogedIn=false;
-    localStorage.clear();
-    return<h3>You have been logged out</h3>
+    state.role='';
+    return(
+    
+    <LogoutState/>)
 }
 
 const protectedRoute = createBrowserRouter([
@@ -39,6 +43,10 @@ const protectedRoute = createBrowserRouter([
             {
                 path: "*",
                 element: <h1>404 - Not Found</h1>
+            },
+            {
+                path: "",
+                element: <RoleToDash/>
             },
             {
                 path: "login",
@@ -63,10 +71,7 @@ const protectedRoute = createBrowserRouter([
             },
             {
                 path: "tickets",
-                element: <TicketsList />,
-                children: [
-
-                ]
+                element: <TicketsList />
             },
             {
                 path: `/tickets/:id`,

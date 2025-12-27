@@ -103,7 +103,7 @@ export function AuthProvider({children}:{children:ReactNode})
                     type:'logout'
                 })
             }
-        console.log(decoded.isLogedIn," 👍😎🙌",decoded.role)
+      
         }
             catch{
                    dispatch({
@@ -129,7 +129,7 @@ export function useAuth():AuthContextProps {
     if (!context){
         throw new Error("useAuth must be used within an AuthProvider")
     }
-    console.log(context.state.token);
+   
     
     return context;
 }

@@ -1,73 +1,47 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# HelpDesk Client 🛠️
 
-Currently, two official plugins are available:
+מערכת לניהול קריאות שירות (HelpDesk) שנבנתה באמצעות React, TypeScript ו-Material UI.
+המערכת מאפשרת למשתמשים לפתוח קריאות שירות, ולמנהלים/נציגים לנהל אותן, לעדכן סטטוסים ולתקשר עם המשתמשים באמצעות מערכת תגובות.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ תכונות עיקריות
 
-## React Compiler
+* **ניהול משתמשים והרשאות:**
+    * הרשמה והתחברות מאובטחת.
+    * תמיכה בסוגי משתמשים שונים: לקוח (Customer), נציג (Agent), ומנהל (Admin).
+    * ניתוב מוגן (Protected Routes) בהתאם לתפקיד המשתמש.
+* **ניהול קריאות (Tickets):**
+    * פתיחת קריאה חדשה עם עדיפות (נמוכה, בינונית, גבוהה).
+    * צפייה ברשימת קריאות אישית (ללקוח) או כללית (למנהל).
+    * עדכון סטטוס קריאה ופרטים נוספים.
+    * מחיקת קריאות (למנהלים).
+* **מערכת תגובות (Comments):**
+    * צ'אט פנימי בתוך כל קריאה.
+    * הוספת תגובות בזמן אמת.
+* **ממשק משתמש (UI):**
+    * עיצוב נקי ומודרני באמצעות ספריית **Material UI (MUI)**.
+    * רספונסיביות מלאה (מותאם למובייל ולדסקטופ).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 טכנולוגיות
 
-## Expanding the ESLint configuration
+הפרויקט נבנה באמצעות הכלים והספריות הבאים:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+* **[React](https://reactjs.org/)** - ספריית UI.
+* **[TypeScript](https://www.typescriptlang.org/)** - שפה לכתיבת קוד בטוחה יותר.
+* **[Vite](https://vitejs.dev/)** - כלי Build מהיר לפיתוח.
+* **[Material UI (MUI)](https://mui.com/)** - ספריית רכיבי עיצוב.
+* **[React Router DOM](https://reactrouter.com/)** - ניהול ניווט וראוטינג.
+* **[React Hook Form](https://react-hook-form.com/)** + **[Yup](https://github.com/jquense/yup)** - ניהול טפסים וולידציה.
+* **[Axios](https://axios-http.com/)** - ביצוע קריאות שרת (API).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ התקנה והרצה
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+עקוב אחר ההוראות הבאות כדי להריץ את הפרויקט בסביבה המקומית שלך:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### דרישות מקדימות
+* [Node.js](https://nodejs.org/) מותקן במחשב.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 1. שכפול המאגר (Clone)
+```bash
+git clone [https://github.com/your-username/helpdesk-client.git](https://github.com/your-username/helpdesk-client.git)
+cd helpdesk-client

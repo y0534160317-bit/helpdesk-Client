@@ -180,3 +180,17 @@ export const addCommentByIdCall = async (token: string, id: number, comment: str
     throw error;
   }
 }
+
+export const getStatusesCall = async (token: string) => {
+  try {
+    const response = await axios.get('http://localhost:4000/statuses', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error in getting all statuses:', error);
+    throw error;
+  }
+}
