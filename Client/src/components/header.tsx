@@ -1,5 +1,6 @@
 import { Link as RouterLink } from "react-router-dom";
-import { useAuth } from "../features/auth/loginLogic";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store/store";
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -7,7 +8,7 @@ import Button from '@mui/material/Button';
 
 
 const Header = () => {
-  const { state } = useAuth();
+  const { role, isLoggedIn } = useSelector((state: RootState) => state.auth);
 
   return (
     <AppBar position="static" color="default" elevation={1} sx={{ bgcolor: 'white' }}>
@@ -20,13 +21,13 @@ const Header = () => {
             Dashboard
           </Button>
           
-          {!state.isLogedIn && (
+          {!isLoggedIn && (
             <Button component={RouterLink} to="/login" variant="outlined" sx={{ mx: 1 }}>
               Login
             </Button>
           )}
 
-          {state.isLogedIn && (
+          {isLoggedIn && (
             <Button component={RouterLink} to="/logout" color="error" sx={{ mx: 1 }}>
               Logout
             </Button>
@@ -36,7 +37,7 @@ const Header = () => {
             Register
           </Button>
 
-          {state.role === 'admin' && (
+          {role === 'admin' && (
             <Button component={RouterLink} to="/admin" variant="contained" color="primary" sx={{ mx: 1 }}>
               Admin Panel
             </Button>

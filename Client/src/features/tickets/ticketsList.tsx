@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "../auth/loginLogic";
+import { useEffect } from "react"; // ✅ הסר useState
+import { useDispatch, useSelector } from "react-redux"; // ✅ חדש
+import { setTickets } from "../../store/slices/ticketsSlice"; // ✅ תיקון: ../../
+import type { RootState } from "../../store/store";
+
+// ✅ חדש: לקבלת types
+// import { useAuth } from "../auth/loginLogic";
 import { getTicketByIdCall, getTicketsCall } from "../../api/helpdeskApi";
 import { useNavigate } from "react-router-dom";
 // MUI Imports
@@ -30,16 +35,22 @@ export interface Ticket {
 }
 
 const TicketsList = () => {
-    const { state } = useAuth();
-    const [allTickets, setallTickets] = useState<Ticket[]>([]);
+    // const { state } = useAuth();
+    const dispatch = useDispatch(); // ✅ חדש: לשליחת פעולות
+    const { token } = useSelector((state: RootState) => state.auth); // ✅ חדש: קרא token מ-Redux
+    const { allTickets } = useSelector((state: RootState) => state.tickets); // ✅ חדש: קרא כרטיסים מ-Redux
+    // const [allTickets, setallTickets] = useState<Ticket[]>([]);
 
     useEffect(() => {
         const getTickets = async () => {
-            if (state.token === null) return;
-            setallTickets(await getTicketsCall(state.token));
+            if (token === null) return;
+            const tickets = await getTicketsCall(token);
+            dispatch(setTickets(tickets)); // ✅ חדש: שמור ב-Redux במקום useState
+            //
+            // setallTickets(await getTicketsCall(state.token));
         }
         getTickets();
-    }, [state.token]);
+    }, [token, dispatch]); // ✅ חדש: הוסף dispatch כתלות
 
     const navigate = useNavigate();
 
@@ -98,9 +109,10 @@ const TicketsList = () => {
                                             variant="contained" 
                                             size="small"
                                             onClick={async () => {
-                                                if (state.token === null) return;
+                                                                                               if (token === null) return; // ✅ שינוי: במקום state.token, קרא מ-Redux
                                                 if (ticket === null) return;
-                                                const tic = await getTicketByIdCall(state.token, ticket.id);
+                                                const tic = await getTicketByIdCall(token, ticket.id);
+                                                
                                                 console.log(tic);
                                                 navigate(`/tickets/${ticket.id}`, { state: { ticket: tic } });
                                             }}

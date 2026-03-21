@@ -1,101 +1,65 @@
-import { useEffect, useState } from "react";
+
+
+// export default CommentsList;
+import { useEffect } from "react"; // ✅ הסר useState
+import { useDispatch, useSelector } from "react-redux"; // ✅ חדש
+import { setComments } from "../../store/slices/commentsSlice"; // ✅ חדש
+import type { RootState } from "../../store/store"; // ✅ חדש
 import { getCommentsByIdCall } from "../../api/helpdeskApi";
-import { useAuth } from "../auth/loginLogic";
 // MUI Imports
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Avatar from '@mui/material/Avatar';
-import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
 
 export interface Comment {
-    id: number | null,
-    ticket_id: number | null,
-    author_id: number | null,
-    content: string,
-    author_name: string,
-    author_email: string,
-    created_at: string
+  id: number;
+  content: string;
+  ticket_id: number;
+  user_id: number;
+  user_name?: string;
+  created_at?: string;
 }
 
 const CommentsList = ({ id }: { id: number | null }) => {
-    const { state } = useAuth();
-    const [allComments, setAllComments] = useState<Comment[]>([]);
+  const dispatch = useDispatch(); // ✅ חדש
+  const { token } = useSelector((state: RootState) => state.auth); // ✅ חדש: קרא token מ-Redux
+  const { comments } = useSelector((state: RootState) => state.comments); // ✅ חדש: קרא תגובות מ-Redux
 
-    useEffect(() => {
-        const getComments = async () => {
-            if (state.token === null || id === null) return;
-            setAllComments(await getCommentsByIdCall(state.token, id));
-        }
-        getComments();
-    }, [state.token, id]);
-
-    if (state.token === null || id === null) return null;
-
-    // פונקציית עזר ליצירת צבע רקע לאווטאר לפי שם
-    const stringToColor = (string: string) => {
-        let hash = 0;
-        for (let i = 0; i < string.length; i++) {
-            hash = string.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        let color = '#';
-        for (let i = 0; i < 3; i++) {
-            const value = (hash >> (i * 8)) & 0xFF;
-            color += ('00' + value.toString(16)).substr(-2);
-        }
-        return color;
+  useEffect(() => {
+    const getComments = async () => {
+      if (id === null || !token) return;
+      const fetchedComments = await getCommentsByIdCall(token, id);
+      dispatch(setComments(fetchedComments)); // ✅ חדש: שמור ב-Redux
     }
+    getComments();
+  }, [id, token, dispatch]); // ✅ שינוי: הוסף dispatch כ-dependency
 
-    return (
-        <Paper elevation={0} sx={{ bgcolor: 'transparent' }}>
-            {allComments.length > 0 ? (
-                <List sx={{ width: '100%', bgcolor: 'background.paper', borderRadius: 2 }}>
-                    {allComments.map((comment: Comment, index) => (
-                        <div key={comment.id || index}>
-                            <ListItem alignItems="flex-start">
-                                <ListItemAvatar>
-                                    <Avatar 
-                                        alt={comment.author_name} 
-                                        sx={{ bgcolor: stringToColor(comment.author_name || 'U') }}
-                                    >
-                                        {comment.author_name ? comment.author_name[0].toUpperCase() : '?'}
-                                    </Avatar>
-                                </ListItemAvatar>
-                                <ListItemText
-                                    primary={
-                                        <Typography sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ fontWeight: 'bold' }}>{comment.author_name}</span>
-                                            <Typography variant="caption" color="textSecondary">
-                                                {new Date(comment.created_at).toLocaleString('he-IL')}
-                                            </Typography>
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography
-                                            sx={{ display: 'inline', mt: 1 }}
-                                            component="span"
-                                            variant="body2"
-                                            color="text.primary"
-                                        >
-                                            {comment.content}
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                            {index < allComments.length - 1 && <Divider variant="inset" component="li" />}
-                        </div>
-                    ))}
-                </List>
-            ) : (
-                <Typography variant="body2" color="textSecondary" align="center" sx={{ py: 2 }}>
-                    אין תגובות עדיין. היה הראשון להגיב!
-                </Typography>
-            )}
-        </Paper>
-    );
-}
+  return (
+    <Box sx={{ mt: 4 }}>
+      <Typography variant="h5" gutterBottom>
+        תגובות
+      </Typography>
+      {comments.length > 0 ? (
+        comments.map((comment: Comment) => (
+          <Paper key={comment.id} sx={{ p: 2, mb: 2, bgcolor: '#f5f5f5' }}>
+            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+              {comment.user_name || 'משתמש אנונימי'}
+            </Typography>
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              {comment.content}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'gray', mt: 1 }}>
+              {new Date(comment.created_at || '').toLocaleDateString('he-IL')}
+            </Typography>
+          </Paper>
+        ))
+      ) : (
+        <Typography variant="body2" sx={{ color: 'gray' }}>
+          אין תגובות עדיין
+        </Typography>
+      )}
+    </Box>
+  );
+};
 
 export default CommentsList;

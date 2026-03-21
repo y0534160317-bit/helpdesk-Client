@@ -2,6 +2,10 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { authorizeUserCall, registerUserCall } from "../api/helpdeskApi";
+import { useDispatch } from "react-redux";
+import { login } from "../store/slices/authSlice";
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 // MUI Imports
 import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
@@ -27,6 +31,8 @@ export interface RUser {
 }
 
 const Register = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -38,10 +44,18 @@ const Register = () => {
   const onSubmit = async (data: RUser) => {
     try {
       const response = await registerUserCall(data);
+      // ✅ חדש: התחבר מיד אחרי רישום
       const response2 = await authorizeUserCall({
         email: data.email,
         password: data.password
       });
+      const token = response2.token;
+      // ✅ חדש: פענח token
+      const decoded: any = jwtDecode(token);
+
+      // ✅ חדש: שמור ב-Redux וניווט
+      dispatch(login({ token, role: decoded.role || null }));
+      navigate("/dashboard", { replace: true });
       console.log("User registered successfully:", response);
       // כאן מומלץ להוסיף ניווט לדף הבית או הודעת הצלחה
     } catch (error) {

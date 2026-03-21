@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import Login from "../pages/login";
 import Register from "../pages/register";
-import { useAuth } from "../features/auth/loginLogic";
 import AdminDashboard from "../pages/adminDashboard";
 import TicketsList from "../features/tickets/ticketsList";
 import AddTicket from "../features/tickets/addTicket";
@@ -15,8 +14,8 @@ import AddUser from "../features/users/addUser"
 import LogoutState from "../pages/logoutState";
 
 const RoleToDash = () => {
-    const { state } = useAuth()
-    switch (state.role) {
+    const role = localStorage.getItem('userRole');
+    switch (role) {
         case 'admin': return <AdminDashboard />
         case 'agent': return <AgentDashboard />
         case 'customer': return <CustomerDashboard />
@@ -26,11 +25,8 @@ const RoleToDash = () => {
 
 const Logout=()=>{
     localStorage.removeItem('authToken');
-    const { state } = useAuth()
-    state.isLogedIn=false;
-    state.role='';
+    localStorage.removeItem('userRole');
     return(
-    
     <LogoutState/>)
 }
 

@@ -1,31 +1,29 @@
-import { useEffect, useState } from "react";
-import {  getStatusesCall } from "../../api/helpdeskApi";
-import { useAuth } from "../auth/loginLogic";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setStatuses } from "../../store/slices/statusesSlice";
+import type { RootState } from "../../store/store";
+import { getStatusesCall } from "../../api/helpdeskApi";
 
 
-export interface Status {
-    id: number,
-    name: string
-}
+const statusesList = () => {
+    const dispatch = useDispatch();
+    const { allStatuses } = useSelector((state: RootState) => state.statuses);
+    const { token } = useSelector((state: RootState) => state.auth);
 
-const statusesList =  () => {
-    const {state}=useAuth()
-    if(state.token===null)return
-  
-    const [allStatuses,setAllStatuses] = useState<Status[]>([]);
     useEffect(() => {
-    const getStatuses = async () => {
-        if (state.token === null) return;
-        setAllStatuses(await getStatusesCall(state.token));
-    }
-    getStatuses();
-}, [state.token]); 
- if(state.token===null)return null;
+        const getStatuses = async () => {
+            if (!token) return;
+            const fetchedStatuses = await getStatusesCall(token);
+            dispatch(setStatuses(fetchedStatuses));
+        }
+        getStatuses();
+    }, [token, dispatch]);
 
     return (
-
         <>
-       {allStatuses} 
+            {allStatuses.map(status => (
+                <div key={status.id}>{status.name}</div>
+            ))}
         </>
     )
 }

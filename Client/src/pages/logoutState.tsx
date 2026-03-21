@@ -1,7 +1,15 @@
 
-import { Link } from "react-router-dom"
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { logout } from "../store/slices/authSlice";
 
 const logoutState=()=>{
+    const dispatch = useDispatch();
+    
+    useEffect(() => {
+        dispatch(logout());
+    }, [dispatch]);
     return(<>
   <br/>
     <br/> 
@@ -10,29 +18,7 @@ const logoutState=()=>{
      <Link to="/login">To Enter</Link>
     <br/>
     <br/>
-    <h2>!
-        לכבוד המורה</h2>
-<p>
-...
-     ע"י התנסות בכתיבת קוד עצמאית ומקיפה
-react
-ככלל, ראיתי את מגמת הפרויקט הזה ללימוד 
-
-
- <br/>
-מטרה שאכן הושגה,
-אם כי בפועל לא הגעתי לסיום כל הפרטים, מימוש כל הפיצרים וסגירת פינות 
-<br/>
-navigate
-    לדוגמא *לאחר עדכון כגון הרשמה, התחברות או התנתקות יש לרפרש את הדף למרות ה
-<br/>
-...
-מסתבר שכמה שעות נוספות היו מועילות ממש
-<br/>
-<br/>
-החלטתי בכל אופן להגיש זאת כך,בתקוה להתבוננות בקיים ובלמידה שנוספה איתו ובעקבותיו
-</p>
-
+   
     </>)
 
 

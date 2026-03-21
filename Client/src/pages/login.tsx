@@ -3,6 +3,9 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { authorizeUserCall } from "../api/helpdeskApi";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { login } from "../store/slices/authSlice";
+import { jwtDecode } from "jwt-decode";
 // MUI Imports
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -27,7 +30,7 @@ export interface LUser {
 
 const Login = () => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -39,8 +42,11 @@ const Login = () => {
   const onSubmit = async (data: LUser) => {
     try {
       const response = await authorizeUserCall(data);
+      const token = response.token;
+      const decoded: any = jwtDecode(token);
+      dispatch(login({ token, role: decoded.role || null }));
       console.log("Login successful");
-      console.log(response);    
+      console.log(response);
       navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error("Login failed:", error);
@@ -85,7 +91,7 @@ const Login = () => {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3,mb: 2 }}
+            sx={{ mt: 3, mb: 2 }}
           >
             התחבר
           </Button>

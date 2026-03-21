@@ -1,122 +1,103 @@
-import { useLocation } from "react-router-dom";
-import { useAuth } from "../auth/loginLogic";
-import UpdateTicket, { type ticketToUpdate } from "./updateTicket";
+import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
+import type { Ticket } from "../../store/slices/ticketsSlice";
+import UpdateTicket from "./updateTicket";
 import DeleteTicket from "./deleteTicket";
 import CommentsList from "../comments/commentsList";
 import AddComment from "../comments/addComment";
-// MUI Imports
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import Grid from '@mui/material/Grid';
-import { useEffect, useState } from "react";
-import type { Ticket } from "./ticketsList";
-
-
 
 const TicketDetails = () => {
-    const { state } = useAuth();
-    const location = useLocation();
-    const { ticket } = location.state || {};
+    const { id } = useParams<{ id: string }>(); // ✅ חדש: קסטי id מ-URL params
+    const { allTickets } = useSelector((state: RootState) => state.tickets); // ✅ חדש: קרא כרטיסים מ-Redux
+    const { role } = useSelector((state: RootState) => state.auth); // ✅ חדש: קרא role מ-Redux
 
+    // ✅ גמ. מצא כרטיס ב-Redux לפי ID
+    const currentTicket = allTickets.find(t => t.id === Number(id)) as Ticket | undefined;
 
-    const [currentTicket, setCurrentTicket] = useState<Ticket>(ticket);
+    if (!currentTicket) {
+        return (
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+                <Typography variant="h6" color="textSecondary">
+                    לא נמצאו פרטי קריאה.
+                </Typography>
+            </Paper>
+        );
+    }
 
-    useEffect(() => {
-        if (currentTicket) {
-    
-            setCurrentTicket(currentTicket);
-
-        }
-    }, [currentTicket]);
-
-
-    const handleUpdate = (updatedTicket: ticketToUpdate) => {
-
-   const tic = updatedTicket as Ticket;
-
-
-
-
-        setCurrentTicket(tic);
+    const handleUpdate = () => {
+        // עדכון סאטומטי דרך Redux - אין צורך בעדכון יד
     };
 
-
-
-
-if (!currentTicket) {
     return (
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant="h6" color="textSecondary">
-                לא נמצאו פרטי קריאה.
-            </Typography>
-        </Paper>
-    );
-}
-
-return (
-    <Paper elevation={3} sx={{ p: 4, mt: 2 }}>
-        {/* כותרת ופעולות ניהול */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-            <Box>
-                <Typography variant="h4" gutterBottom component="div" sx={{ fontWeight: 'bold' }}>
-                    {currentTicket.subject}
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                    מזהה קריאה: #{currentTicket.id}
-                </Typography>
-            </Box>
-
-            <Stack direction="row" spacing={1}>
-                {(state.role === 'admin' || state.role === 'agent') && <UpdateTicket id={ticket.id} onUpdate={handleUpdate} />}
-
-                {(state.role === 'admin') && <DeleteTicket id={ticket.id} />}
-            </Stack>
-        </Box>
-
-        <Divider sx={{ mb: 3 }} />
-
-        {/* פרטי סטטוס ותיאור */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} md={8}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    תיאור התקלה:
-                </Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', bgcolor: '#f9f9f9', p: 2, borderRadius: 1 }}>
-                    {ticket.description}
-                </Typography>
-            </Grid>
-            <Grid item xs={12} md={4}>
-                <Stack spacing={2}>
+        <Paper elevation={3} sx={{ p: 4, mt: 2 }}>
+                {/* כותרת ופעולות ניהול */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                     <Box>
-                        <Typography variant="subtitle2" color="textSecondary">סטטוס</Typography>
-                        <Chip label={ticket.status_name} color="primary" variant="outlined" />
+                        <Typography variant="h4" gutterBottom component="div" sx={{ fontWeight: 'bold' }}>
+                            {currentTicket.subject}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                            מזהה קריאה: #{currentTicket.id}
+                        </Typography>
                     </Box>
-                    <Box>
-                        <Typography variant="subtitle2" color="textSecondary">עדיפות</Typography>
-                        <Chip label={ticket.priority_name} color={ticket.priority_name === 'high' ? 'error' : 'warning'} />
+
+                    <Stack direction="row" spacing={1}>
+                        {(role === 'admin' || role === 'agent') && <UpdateTicket id={currentTicket.id} onUpdate={handleUpdate} />}
+                        {(role === 'admin') && <DeleteTicket id={currentTicket.id} />}
+                    </Stack>
+                </Box>
+
+                <Divider sx={{ mb: 3 }} />
+
+                <Box sx={{ mt: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                        פרטים נוספים
+                    </Typography>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3, mb: 4 }}>
+                        <Box>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                תיאור התקלה:
+                            </Typography>
+                            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', bgcolor: '#f9f9f9', p: 2, borderRadius: 1 }}>
+                                {currentTicket.description}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Stack spacing={2}>
+                                <Box>
+                                    <Typography variant="subtitle2" color="textSecondary">סטטוס</Typography>
+                                    <Chip label={currentTicket.status_name} color="primary" variant="outlined" />
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle2" color="textSecondary">עדיפות</Typography>
+                                    <Chip label={currentTicket.priority_name} color={currentTicket.priority_name === 'high' ? 'error' : 'warning'} />
+                                </Box>
+                            </Stack>
+                        </Box>
                     </Box>
-                </Stack>
-            </Grid>
-        </Grid>
+                </Box>
 
-        <Divider sx={{ mb: 3 }} />
+                <Divider sx={{ mb: 3 }} />
 
-        {/* אזור התגובות */}
-        <Box sx={{ bgcolor: '#fafafa', p: 3, borderRadius: 2 }}>
-            <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
-                תגובות והתכתבות
-            </Typography>
-            <CommentsList id={ticket.id} />
-            <Box sx={{ mt: 3 }}>
-                <AddComment id={ticket.id} />
-            </Box>
-        </Box>
-    </Paper>
-);
-}
+                {/* אזור התגובות */}
+                <Box sx={{ bgcolor: '#fafafa', p: 3, borderRadius: 2 }}>
+                    <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+                        תגובות והתכתבות
+                    </Typography>
+                    <CommentsList id={currentTicket.id} />
+                    <Box sx={{ mt: 3 }}>
+                        <AddComment id={currentTicket.id} />
+                    </Box>
+                </Box>
+            </Paper>
+        );
+};
 
 export default TicketDetails;

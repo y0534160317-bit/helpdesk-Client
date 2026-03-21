@@ -1,7 +1,10 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { useAuth } from "../auth/loginLogic";
+import { useDispatch, useSelector } from "react-redux"; // ✅ חדש
+import { addTicket } from "../../store/slices/ticketsSlice"; // ✅ חדש
+import type { RootState } from "../../store/store"; // ✅ חדש
+import type { Ticket } from "./ticketsList"; // ✅ חדש: לקבלת Ticket type
 import { addTicketCall } from "../../api/helpdeskApi";
 import { useNavigate } from "react-router-dom";
 // MUI Imports
@@ -28,7 +31,9 @@ const schema = yup
     .required();
 
 const AddTicket = () => {
+    const dispatch = useDispatch(); // ✅ חדש
     const navigate = useNavigate();
+    const { token } = useSelector((state: RootState) => state.auth); // ✅ חדש: קרא token מ-Redux
 
     const {
         register,
@@ -37,19 +42,19 @@ const AddTicket = () => {
     } = useForm({
         resolver: yupResolver(schema),
     });
-    const { state } = useAuth();
 
     const onSubmit = async (data: TicketToAdd) => {
         try {
-            if (state.token === null) return;
-            const response = await addTicketCall(state.token, data);
+            if (token === null) return; // ✅ שינוי: קרא token מ-Redux
+            const response = await addTicketCall(token, data); // ✅ שינוי
+            // ✅ חדש: שמור כרטיס ב-Redux מיד אחרי הוספה
+            dispatch(addTicket(response as Ticket));
             console.log("Ticket added successfully:", response);
-            navigate("/dashboard", { replace: true });
+            navigate("/tickets", { replace: true }); // ✅ שינוי: למשא לtickets, לא dashboard
         } catch (error) {
             console.log("Adding ticket failed, please try again.");
             console.error(error);
         }
-        console.log(data);
     }
 
     return (

@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setUsers } from "../../store/slices/usersSlice";
+import type { RootState } from "../../store/store";
+import type { User } from "../../store/slices/usersSlice";
 import { getUsersByIdCall, getUsersCall } from "../../api/helpdeskApi";
-import { useAuth } from "../../features/auth/loginLogic";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 // MUI Imports
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -18,25 +21,20 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import PersonIcon from '@mui/icons-material/Person';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 
-export interface User {
-    id: number,
-    name: string,
-    email: string,
-    role: string,
-}
-
 const UsersList = () => {
-    const { state } = useAuth();
-    const [allUsers, setAllUsers] = useState<User[]>([]);
+    const dispatch = useDispatch();
+    const { allUsers } = useSelector((state: RootState) => state.users);
+    const { token } = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
 
     useEffect(() => {
         const getUsers = async () => {
-            if (state.token === null) return;
-            setAllUsers(await getUsersCall(state.token));
+            if (!token) return;
+            const response = await getUsersCall(token);
+            dispatch(setUsers(response));
         }
         getUsers();
-    }, [state.token]);
+    }, [token, dispatch]);
 
     const getRoleIcon = (role: string) => {
         switch (role) {
@@ -55,10 +53,7 @@ const UsersList = () => {
                 <Button 
                     variant="contained" 
                     startIcon={<PersonAddIcon />}
-                    onClick={async () => {
-                        if (state.token === null) return;
-                        navigate(`/users/adduser`);
-                    }}
+                    onClick={() => navigate(`/users/adduser`)}
                 >
                     הוספת משתמש
                 </Button>
@@ -96,9 +91,8 @@ const UsersList = () => {
                                             variant="outlined" 
                                             size="small"
                                             onClick={async () => {
-                                                if (state.token === null) return;
-                                                if (user === null) return;
-                                                const usr = await getUsersByIdCall(state.token, user.id);
+                                                if (!token) return;
+                                                const usr = await getUsersByIdCall(token, user.id);
                                                 navigate(`/users/${user.id}`, { state: { user: usr } });
                                             }}
                                         >

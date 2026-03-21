@@ -1,5 +1,10 @@
+
+
+// export default AddComment;
 import { useState } from "react";
-import { useAuth } from "../auth/loginLogic";
+import { useDispatch, useSelector } from "react-redux"; // ✅ חדש
+import { addComment } from "../../store/slices/commentsSlice"; // ✅ תיקון: ../../
+import type { RootState } from "../../store/store"; // ✅ תיקון: ../../
 import { addCommentByIdCall } from "../../api/helpdeskApi";
 // MUI Imports
 import TextField from '@mui/material/TextField';
@@ -8,14 +13,23 @@ import Box from '@mui/material/Box';
 import SendIcon from '@mui/icons-material/Send';
 
 const AddComment = ({ id }: { id: number | null }) => {
-  const { state } = useAuth();
+  const dispatch = useDispatch(); // ✅ חדש
+  const { token } = useSelector((state: RootState) => state.auth); // ✅ חדש: קרא token מ-Redux
   const [comment, setComment] = useState("");
 
   const handleAddComment = async () => {
-    if (!state.token) return;
+    if (!token) return; // ✅ שינוי: קרא token מ-Redux
     if (id === null) return;
     try {
-      await addCommentByIdCall(state.token, id, comment);
+      const response = await addCommentByIdCall(token, id, comment);
+      // ✅ חדש: שמור תגובה ב-Redux מיד אחרי הוספה
+      dispatch(addComment({
+        id: response.id,
+        content: comment,
+        ticket_id: id,
+        user_id: response.user_id,
+        created_at: response.created_at,
+      }));
       setComment(""); 
     } catch (error) {
       console.error("Error adding comment:", error);
@@ -38,7 +52,7 @@ const AddComment = ({ id }: { id: number | null }) => {
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button 
             variant="contained" 
-            endIcon={<SendIcon sx={{ transform: "scaleX(-1)" }} />} // היפוך האייקון לעברית
+            endIcon={<SendIcon sx={{ transform: "scaleX(-1)" }} />}
             onClick={handleAddComment}
             disabled={!comment.trim()}
         >

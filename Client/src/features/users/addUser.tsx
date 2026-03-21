@@ -1,8 +1,12 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useAuth } from "../../features/auth/loginLogic";
+import { useDispatch, useSelector } from "react-redux"; // ✅ חדש
+import { addUser } from "../../store/slices/usersSlice"; // ✅ חדש
+import type { RootState } from "../../store/store"; // ✅ חדש
+import type { User } from "../../store/slices/usersSlice"; // ✅ חדש
 import { addUserCall } from "../../api/helpdeskApi";
+import { useNavigate } from "react-router-dom"; // ✅ חדש: לניווט אחרי הוספה
 // MUI Imports
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -29,6 +33,10 @@ export interface AUser {
 }
 
 const AddUser = () => {
+    const dispatch = useDispatch(); // ✅ חדש
+    const navigate = useNavigate(); // ✅ חדש
+    const { token } = useSelector((state: RootState) => state.auth); // ✅ חדש: קרא token מ-Redux
+
     const {
         register,
         handleSubmit,
@@ -36,18 +44,19 @@ const AddUser = () => {
     } = useForm({
         resolver: yupResolver(schema),
     });
-    const { state } = useAuth();
 
     const onSubmit = async (data: AUser) => {
         try {
-            if (state.token === null) return;
-            const response = await addUserCall(state.token, data);
+            if (token === null) return; // ✅ שינוי: קרא מ-Redux
+            const response = await addUserCall(token, data);
+            // ✅ חדש: dispatch ל-Redux כדי להוסיף משתמש מיד
+            dispatch(addUser(response as User));
             console.log("User added successfully:", response);
+            navigate("/users", { replace: true }); // ✅ חדש: ניווט אתהםחקט-הכתרים
         } catch (error) {
             console.log("Adding user failed, please try again.");
             console.error(error);
         }
-        console.log(data);
     }
 
     return (

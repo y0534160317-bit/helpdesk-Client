@@ -1,7 +1,12 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { useAuth } from "../auth/loginLogic";
+import { useDispatch, useSelector } from "react-redux";
+import { updateTicket } from "../../store/slices/ticketsSlice";
+import { setStatuses } from "../../store/slices/statusesSlice";
+import { setUsers } from "../../store/slices/usersSlice";
+import type { RootState } from "../../store/store";
+import type { Ticket } from "../../store/slices/ticketsSlice";
 import { getStatusesCall, getUsersCall, updateTicketCall } from "../../api/helpdeskApi";
 // MUI Imports
 import TextField from '@mui/material/TextField';
@@ -10,11 +15,7 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
-import { useEffect, useState } from "react";
-import type { Status } from "../statusesAndPriority/statusesList";
-import StatusesList from "../statusesAndPriority/statusesList";
-import setTicket from "./ticketsDetails";
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 export interface ticketToUpdate {
     status_id: number | null,
@@ -36,7 +37,10 @@ const schema = yup
     .required();
 
 const UpdateTicket = ({ id, onUpdate }: UpdateTicketProps) => {
-    const { state } = useAuth();
+    const dispatch = useDispatch();
+    const { token } = useSelector((state: RootState) => state.auth);
+    const { allStatuses } = useSelector((state: RootState) => state.statuses);
+    const { allUsers } = useSelector((state: RootState) => state.users);
 
     const {
         register,
@@ -45,45 +49,39 @@ const UpdateTicket = ({ id, onUpdate }: UpdateTicketProps) => {
     } = useForm({
         resolver: yupResolver(schema),
     });
-    const [statuses, setStatuses] = useState<Status[]>([])
 
     useEffect(() => {
-        const getStatuses = async () => {
-            if (state.token === null) return;
-            const allStatuses = await getStatusesCall(state.token);
-            setStatuses(allStatuses);
+        const fetchStatuses = async () => {
+            if (!token) return;
+            const stats = await getStatusesCall(token);
+            dispatch(setStatuses(stats));
         };
-        getStatuses();
-    }, [state.token]);
-
-    const [users, setUsers] = useState<Status[]>([])
+        fetchStatuses();
+    }, [token, dispatch]);
 
     useEffect(() => {
-        const getUsers = async () => {
-            if (state.token === null) return;
-            const allUsers = await getUsersCall(state.token);
-            setUsers(allUsers);
+        const fetchUsers = async () => {
+            if (!token) return;
+            const users = await getUsersCall(token);
+            dispatch(setUsers(users));
         };
-        getUsers();
-    }, [state.token]);
+        fetchUsers();
+    }, [token, dispatch]);
 
-   
-
-
-
-const onSubmit = async (data: ticketToUpdate) => {
-    try {
-        if (state.token === null) return;
-        if (id === null) return;
-        const response = await updateTicketCall(state.token, id, data);
-        console.log("Ticket update successfully:", response);
-        
-    } catch (error) {
-        console.log("Updating ticket failed, please try again.");
-        console.error(error);
+    const onSubmit = async (data: ticketToUpdate) => {
+        try {
+            if (token === null) return; // ✅ שינוי: קרא מ-Redux
+            if (id === null) return;
+            const response = await updateTicketCall(token, id, data);
+            // ✅ חדש: dispatch ל-Redux כדי לעדכן כרטיס מיד
+            dispatch(updateTicket(response as Ticket));
+            onUpdate(data); // גם קוראים parents update
+            console.log("Ticket update successfully:", response);
+        } catch (error) {
+            console.log("Updating ticket failed, please try again.");
+            console.error(error);
+        }
     }
-    console.log(data);
-}
 
 return (
     <Paper elevation={2} sx={{ p: 3, mt: 2, bgcolor: '#f9f9f9' }}>
@@ -103,15 +101,15 @@ return (
                 error={!!errors.status_id}
                 helperText={errors.status_id?.message}
             >
-                {statuses.length !== 0 ? (
-                    statuses.map((status) => (
+                {allStatuses.length !== 0 ? (
+                    allStatuses.map((status) => (
                         <MenuItem key={status.id} value={status.id}>
                             {status.name}
                         </MenuItem>
                     ))
                 ) : (
                     <MenuItem disabled>
-                        אין טיקטים
+                        אין סטטוסים
                     </MenuItem>
                 )}
             </TextField>
@@ -142,9 +140,9 @@ return (
             error={!!errors.assigned_to}
             helperText={errors.assigned_to?.message}
         >
-            {users.length !== 0 ? (
-                users
-                    .filter(user => user.role === "agent") // פילטר לסוכנים
+            {allUsers.length !== 0 ? (
+                allUsers
+                    .filter(user => user.role === "agent")
                     .map(user => (
                         <MenuItem key={user.id} value={user.id}>
                             {user.name}
